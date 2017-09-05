@@ -11,16 +11,14 @@ end_date = 'blah'
 
 
 def create_bucketed_dict(start, end, interval):
-    ret_vals = dict()
-    counter = start
-    while counter <= end:
-        ret_vals[counter] = []
-        counter += interval
-    return ret_vals
+    seconds = (end - start).total_seconds()
+    length = int(seconds / interval)
+    return [0] * length
 
 
 def hash_date_to_bucket(date, interval, start_date):
-    pass
+    seconds = (date - start_date).total_seconds
+    return int(seconds / interval)
 
 
 with open(infile, 'r') as input_file:
