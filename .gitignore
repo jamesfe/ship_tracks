@@ -1,3 +1,4 @@
 data/
 localenv/
 js/node_modules/
+js/public/dist/
