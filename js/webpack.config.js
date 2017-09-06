@@ -1,12 +1,10 @@
 var path = require('path');
 var webpack = require('webpack');
-// http://jamesknelson.com/webpack-made-simple-build-es6-less-with-autorefresh-in-26-lines/
-// http://jamesknelson.com/using-es6-in-the-browser-with-babel-6-and-webpack/
 
 module.exports = {
   entry: [
     'babel-polyfill',
-    './src/render_graph.js'
+    './src/render_svg.js'
   ],
   output: {
     filename: 'bundle.js',
