@@ -15,7 +15,10 @@ print('From {} to {}'.format(start_julian, end_julian))
 julian_files = [open('./daily/misc.json', 'w')]
 
 for k in range(1, end_julian + 1):
-    julian_files.append(open('./daily/{}.json'.format(k), 'w'))
+    julian_files.append(open('./js/public/assets/data/daily/{}.json'.format(k), 'w'))
+    julian_files[k].write('[\n')
+
+lines_written = [0] * len(julian_files)
 
 with open('./data/ship_data_by_line.json', 'r') as infile:
     for line in infile:
@@ -24,9 +27,18 @@ with open('./data/ship_data_by_line.json', 'r') as infile:
         start = parser.parse(prop['trackStartTime'])
         jday = start.timetuple().tm_yday
         try:
-            julian_files[jday].write(json.dumps(line) + '\n')
+            if lines_written[jday] == 0:
+                julian_files[jday].write(line.strip())
+            else:
+                julian_files[jday].write(',\n' + line.strip())
+            lines_written[jday] += 1
         except:
             print('Failed on index: ', jday)
 
 for item in julian_files:
+    item.write(']')
     item.close()
+
+
+for index, item in enumerate(lines_written):
+    print('{} {}'.format(index, item))
