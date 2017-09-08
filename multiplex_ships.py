@@ -24,9 +24,9 @@ with open('./data/ship_data_by_line.json', 'r') as infile:
         start = parser.parse(prop['trackStartTime'])
         jday = start.timetuple().tm_yday
         try:
-            julian_files[jday].write(json.dumps(line))
+            julian_files[jday].write(json.dumps(line) + '\n')
         except:
-            print(jday)
+            print('Failed on index: ', jday)
 
 for item in julian_files:
     item.close()
