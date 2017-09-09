@@ -27,7 +27,7 @@ function pad(n) {
 }
 
 function addDays(days) {
-  var dat = new Date(2013, 0, 1);
+  var dat = new Date(2013, 0, 2);
   dat.setDate(dat.getDate() + days);
   return dat;
 }
@@ -115,7 +115,7 @@ fs.readFile(countriesFile, 'utf-8', function(error, data) {
 
     const svg2png = require("svg2png");
     svg2png(d3n.svgString())
-      .then(buffer => fs.writeFile(`./output/${outputDay}.png`, buffer))
+      .then(buffer => fs.writeFileSync(`./output/${outputDay}.png`, buffer))
       .catch(e => console.error(e));
 
     });
