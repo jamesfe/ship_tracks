@@ -33,12 +33,23 @@ var boundingBox = {
       }
     };
 
+function pad(n) {
+    return (n < 100) ? ("0" + n) : n;
+}
+
+var generateDay = process.argv[2];
+if (generateDay === undefined) {
+  throw Error('no day');
+}
+
+var outputDay = pad(generateDay);
+
 var showShipTracks = true;
 var width =  800;
-var height =  600;
+var height =  800;
 
 var styles = {
-  styles: ' .blah { fill: green; stroke: blue; stroke-width: 1px } .lines { fill: none; stroke: red; stroke-width: 2px; }'
+  styles: ' .blah { fill: #8c8e91; stroke: #2c2d2d; stroke-width: 2px } .lines { fill: none; stroke: #4c6363; stroke-width: .5px; } .sea { fill: #88baea; }'
 }
 
 const D3Node = require('d3-node');
@@ -46,7 +57,19 @@ const d3n = new D3Node(styles);      // initializes D3 with container element
 //const d3n = new D3Node();      // initializes D3 with container element
 var svg = d3n.createSVG(width, height);
 
-fs.readFile('./public/assets/data/countries/countries.geo.json', 'utf-8', function(error, data) {
+svg.append("rect")
+  .attr("x", 0)
+  .attr("y", 0)
+  .attr("width", width)
+  .attr("height", height)
+  .attr("class", "sea");
+
+var countriesFile = './public/assets/data/countries/countries.geo.json';
+// var countriesFile = './public/assets/data/countries/cuba_2.geo.json';
+//var countriesFile = './public/assets/data/countries/usa_4.geo.json';
+//var countriesFile = './public/assets/data/countries/selected.geojson';
+
+fs.readFile(countriesFile, 'utf-8', function(error, data) {
   if (error) throw error;
   data = JSON.parse(data);
   var features = data.features;
@@ -55,15 +78,16 @@ fs.readFile('./public/assets/data/countries/countries.geo.json', 'utf-8', functi
   var path = d3.geoPath(projection);
 
   projection.fitSize([width, height], boundingBox);
-  projection.center([-75, 33]);
-  projection.scale(1000);
+  // projection.center([-75, 33]);
+  projection.center([-72, 34]);
+  projection.scale(2000);
 
  svg.append("path")
     .datum({type: "FeatureCollection", features: features})
     .attr("d", path)
     .attr("class", "blah");
 
-  fs.readFile('./public/assets/data/daily/283.json', 'utf-8', function(error, data) {
+  fs.readFile(`./public/assets/data/daily/${generateDay}.json`, 'utf-8', function(error, data) {
     if (error) throw error;
     data = JSON.parse(data);
     var lines = data.map(function(a) { return a.geometry; });
@@ -73,40 +97,12 @@ fs.readFile('./public/assets/data/countries/countries.geo.json', 'utf-8', functi
         .attr("d", path)
         .attr("class", "lines");
     }
-    console.log(d3n.svgString());
-  });
+
+    const svg2png = require("svg2png");
+    svg2png(d3n.svgString())
+      .then(buffer => fs.writeFile(`./output/${outputDay}.png`, buffer))
+      .catch(e => console.error(e));
+
+    });
 
 });
-
-/*
-d3.json('./assets/data/daily/283.json', function(error, data) {
-// d3.json('./assets/data/10_ship_tracks_2011.json', function(error, data) {
-  var features = data.map(function(a) { return a.geometry; });
-
-  //features.forEach(function(a) { debugger; console.log(d3.geo.bounds(a)); });
-
-  var svg = d3.select('#ship_plot'),
-    margin = {top: 20, right: 50,bottom: 20, left: 30},
-    width = svg.attr("width") - margin.left - margin.right,
-    height = svg.attr("height") - margin.top - margin.bottom;
-   // var projection = d3.geoAlbersUsa().scale(1000);
-  var projection = d3.geoEquirectangular();
-  console.log(projection.scale());
-  var path = d3.geoPath().projection(projection);
-  // projection.clipExtent = d3.extent(features.map(function(a) { return path.bounds(a)[0]; }));
-  projection.fitExtent([[0,0],[height, width]], boundingBox);
-  console.log(projection.scale());
-  // projection.fitExtent([[0,0],[height, width]], features[0]);
-  var zoom = projection.scale();
-  console.log(projection.scale());
-  projection.scale(zoom/1000);
-  console.log(projection.scale());
-
-  svg.selectAll("path")
-  .data(features)
-  .enter().append("path")
-    .attr("d", path)
-    .attr("class", "blah");
- });
-
-*/
