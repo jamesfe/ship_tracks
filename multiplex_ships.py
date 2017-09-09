@@ -12,10 +12,15 @@ end_julian = end_dt.timetuple().tm_yday
 
 print('From {} to {}'.format(start_julian, end_julian))
 
-julian_files = [open('./daily/misc.json', 'w')]
+
+def return_good_path(val):
+    return './js/public/assets/data/daily/{}.json'.format(val)
+
+
+julian_files = [open(return_good_path('misc'), 'w')]
 
 for k in range(1, end_julian + 1):
-    julian_files.append(open('./js/public/assets/data/daily/{}.json'.format(k), 'w'))
+    julian_files.append(open(return_good_path(k), 'w'))
     julian_files[k].write('[\n')
 
 lines_written = [0] * len(julian_files)
