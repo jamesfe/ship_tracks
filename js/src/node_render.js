@@ -26,6 +26,12 @@ function pad(n) {
   }
 }
 
+function addDays(days) {
+  var dat = new Date(2013, 0, 1);
+  dat.setDate(dat.getDate() + days);
+  return dat;
+}
+
 var generateDay = process.argv[2];
 if (generateDay === undefined) {
   throw Error('no day');
@@ -53,13 +59,18 @@ svg.append("rect")
   .attr("height", height)
   .attr("class", "sea");
 
+var month = addDays(generateDay).getMonth() + 1;
+var day = addDays(generateDay).getDay();
+
+var dstring = `${month}/${day}/2013`;
 svg.append("text")
-  .attr("x", width-165)
-  .attr("y", height-20)
+  .attr("x", width-10)
+  .attr("y", height-10)
   .attr("font-family", "Roboto, sans-serif")
   .attr("font-size", "36px")
+  .attr("text-anchor", "end")
   .attr("fill", "black")
-  .text(`Day ${outputDay}`);
+  .text(dstring);
 
 var countriesFile = './public/assets/data/countries/countries.geo.json';
 // var countriesFile = './public/assets/data/countries/cuba_2.geo.json';

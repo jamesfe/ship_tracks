@@ -4,6 +4,7 @@ import datetime as dt
 
 from dateutil import parser
 
+# Possible bug: What if the year is not 2011??
 start_dt = dt.datetime(2011, 1, 1)
 start_julian = start_dt.timetuple().tm_yday
 
