@@ -1,7 +1,23 @@
+"""
+A quick script that will multiplex lines from an input file into a number of output files.
+For example here, we see the start and end time for a ship: we want to put each segment into the day-of-year file
+for which it belongs.  So if a voyage lasts three days, the whole segment goes to all three days.  Luckily, most
+voyages are broken up into one day segments (avg length 21 hrs.)
+"""
+
 
 import json
 
 from dateutil import parser
+
+
+def strip_line(line):
+    try:
+        data = json.loads(line)
+        del data['properties']
+    except:
+        print('did not work')
+    return json.dumps(data).strip()
 
 
 def return_good_path(val):
@@ -21,15 +37,20 @@ with open('./data/ship_lines_2011.json', 'r') as infile:
         data = json.loads(line)
         prop = data['properties']
         start = parser.parse(prop['trackStartTime'])
-        jday = start.timetuple().tm_yday
-        try:
-            if lines_written[jday] == 0:
-                julian_files[jday].write(line.strip())
-            else:
-                julian_files[jday].write(',\n' + line.strip())
-            lines_written[jday] += 1
-        except:
-            print('Failed on index: ', jday)
+        end = parser.parse(prop['trackEndTime'])
+        start_day = start.timetuple().tm_yday
+        end_day = end.timetuple().tm_yday
+        for jday in range(start_day, end_day + 1):
+            try:
+                if lines_written[jday] == 0:
+                    # julian_files[jday].write(line.strip())
+                    julian_files[jday].write(strip_line(line))
+                else:
+                    #julian_files[jday].write(',\n' + line.strip())
+                    julian_files[jday].write(',\n' + strip_line(line))
+                lines_written[jday] += 1
+            except:
+                print('Failed on index: ', jday)
 
 for item in julian_files:
     item.write(']')
