@@ -96,8 +96,9 @@ fs.readFile(countriesFile, 'utf-8', function(error, data) {
       .attr("d", path)
       .attr("class", "blah");
   }
-
-  fs.readFile(`./public/assets/data/daily/${generateDay}.json`, 'utf-8', function(error, data) {
+  // tgt_day_file = `./public/assets/data/daily/${generateDay}.json`
+  tgt_day_file = `../data/2011daily/${generateDay}.json`
+  fs.readFile(tgt_day_file, 'utf-8', function(error, data) {
     if (error) throw error;
     data = JSON.parse(data);
     var lines = data.map(function(a) { return a.geometry; });
@@ -140,7 +141,7 @@ fs.readFile(countriesFile, 'utf-8', function(error, data) {
 
       const svg2png = require("svg2png");
         svg2png(d3n.svgString())
-          .then(buffer => fs.writeFileSync(`./output/${outputDay}.png`, buffer))
+          .then(buffer => fs.writeFileSync(`./output2011/${outputDay}.png`, buffer))
           .catch(e => console.error(e));
     });
   });
