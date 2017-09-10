@@ -4,6 +4,10 @@ import json
 import os
 
 
+# hdir = './data/hurricanes/'
+hdir = './data/2013_hurricane_data/'
+
+
 def try_int_or(val):
     try:
         return int(val)
@@ -75,20 +79,8 @@ def make_into_geojson(item):
 
 
 def main():
-    hdir = './data/hurricanes/'
     thing = {
         "features": [],
-        "geocoding": {
-            "creation_date": "2016-10-12",
-            "generator": {
-                "author": {
-                    "name": "Mapzen"
-                },
-                "package": "fences-builder",
-                "version": "0.1.2"
-            },
-            "license": "ODbL (see http://www.openstreetmap.org/copyright)"
-        },
         "type": "FeatureCollection"
     }
     for f in os.listdir(hdir):
