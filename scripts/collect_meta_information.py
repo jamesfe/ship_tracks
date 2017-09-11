@@ -9,10 +9,13 @@ max_time = dt.fromtimestamp(0)
 
 input_file = './data/ship_lines_2011.json'
 
+coords = []
+
 with open(input_file, 'r') as infile:
     for line in infile:
         data = json.loads(line)
         prop = data['properties']
+        coords.append(len(data['geometry']['coordinates'][0]))
         start = parser.parse(prop['trackStartTime'])
         end = parser.parse(prop['trackEndTime'])
         sec_diff = (start - end).seconds
@@ -25,3 +28,4 @@ with open(input_file, 'r') as infile:
 
 print('Start: {} End: {}'.format(min_time, max_time))
 print('Average hours: {} {} {}'.format(len(hours), sum(hours), sum(hours) / len(hours)))
+print('Average coordinates: {} {}', len(coords), sum(coords) / len(coords))
