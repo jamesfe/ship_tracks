@@ -27,12 +27,13 @@ function pad(n) {
 }
 
 function addDays(days) {
-  var dat = new Date(2013, 0, 2);
+  var dat = new Date(2013, 0, 0);
   dat.setDate(dat.getDate() + days);
+
   return dat;
 }
 
-var generateDay = process.argv[2];
+var generateDay = parseInt(process.argv[2]);
 if (generateDay === undefined) {
   throw Error('no day');
 }
@@ -40,6 +41,7 @@ if (generateDay === undefined) {
 var outputDay = pad(generateDay);
 
 var showShipTracks = true;
+var showCountries = true;
 var width =  800;
 var height =  800;
 
@@ -49,7 +51,6 @@ var styles = {
 
 const D3Node = require('d3-node');
 const d3n = new D3Node(styles);      // initializes D3 with container element
-//const d3n = new D3Node();      // initializes D3 with container element
 var svg = d3n.createSVG(width, height);
 
 svg.append("rect")
@@ -60,7 +61,7 @@ svg.append("rect")
   .attr("class", "sea");
 
 var month = addDays(generateDay).getMonth() + 1;
-var day = addDays(generateDay).getDay();
+var day = addDays(generateDay).getDate();
 
 var dstring = `${month}/${day}/2013`;
 svg.append("text")
@@ -89,10 +90,12 @@ fs.readFile(countriesFile, 'utf-8', function(error, data) {
   projection.center([-72, 34]);
   projection.scale(2000);
 
- svg.append("path")
-    .datum({type: "FeatureCollection", features: features})
-    .attr("d", path)
-    .attr("class", "blah");
+  if (showCountries === true) {
+    svg.append("path")
+      .datum({type: "FeatureCollection", features: features})
+      .attr("d", path)
+      .attr("class", "blah");
+  }
 
   fs.readFile(`./public/assets/data/daily/${generateDay}.json`, 'utf-8', function(error, data) {
     if (error) throw error;
@@ -105,19 +108,40 @@ fs.readFile(countriesFile, 'utf-8', function(error, data) {
         .attr("class", "lines");
     }
 
-    svg.append("rect")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("width", width)
-      .attr("height", height)
-      .attr("class", "bord");
+    /* Now we render some hurricanes. */
+    var hurricaneFile = './public/assets/data/hurricanes.geojson';
+    fs.readFile(hurricaneFile, 'utf-8', function(herror, hdata) {
+      if (herror) throw herror;
+      var hurricaneData = JSON.parse(hdata);
 
+      var checkDate = function(obj) {
+        if ((parseInt(obj.properties.day) ===  day) && (parseInt(obj.properties.month)  === month)) {
+          return true;
+        }
+        return false;
+      }
 
-    const svg2png = require("svg2png");
-    svg2png(d3n.svgString())
-      .then(buffer => fs.writeFileSync(`./output/${outputDay}.png`, buffer))
-      .catch(e => console.error(e));
+      var hfeatures = hurricaneData.filter(checkDate);
 
+      svg.selectAll("circle4")
+        .data(hfeatures).enter()
+        .append("circle")
+        .attr("cx", function (d) { return projection(d.geometry.coordinates)[0]; })
+        .attr("cy", function (d) { return projection(d.geometry.coordinates)[1]; })
+        .attr("r", function (d) { return (d.properties.windspeed/3) + "px"; })
+        .attr("fill", "#e04314")
+
+      svg.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", width)
+        .attr("height", height)
+        .attr("class", "bord");
+
+      const svg2png = require("svg2png");
+        svg2png(d3n.svgString())
+          .then(buffer => fs.writeFileSync(`./output/${outputDay}.png`, buffer))
+          .catch(e => console.error(e));
     });
-
+  });
 });
