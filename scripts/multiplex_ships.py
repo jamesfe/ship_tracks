@@ -15,7 +15,7 @@ def strip_line(line):
     try:
         data = json.loads(line)
         del data['properties']
-    except:
+    except ValueError:
         print('did not work')
     return json.dumps(data).strip()
 
@@ -40,16 +40,16 @@ with open('./data/ship_lines_2011.json', 'r') as infile:
         end = parser.parse(prop['trackEndTime'])
         start_day = start.timetuple().tm_yday
         end_day = end.timetuple().tm_yday
+        print(start_day, end_day)
         for jday in range(start_day, end_day + 1):
             try:
                 if lines_written[jday] == 0:
                     # julian_files[jday].write(line.strip())
                     julian_files[jday].write(strip_line(line))
                 else:
-                    #julian_files[jday].write(',\n' + line.strip())
                     julian_files[jday].write(',\n' + strip_line(line))
                 lines_written[jday] += 1
-            except:
+            except ValueError:
                 print('Failed on index: ', jday)
 
 for item in julian_files:
