@@ -11,6 +11,9 @@ import json
 from dateutil import parser
 
 
+input_file = './data/ship_lines_2011.json'
+
+
 def strip_line(line):
     try:
         data = json.loads(line)
@@ -24,38 +27,44 @@ def return_good_path(val):
     return './data/2011daily/{}.json'.format(val)
 
 
-julian_files = [open(return_good_path('misc'), 'w')]
+def main(input_file):
 
-for k in range(1, 366):
-    julian_files.append(open(return_good_path(k), 'w'))
-    julian_files[k].write('[\n')
+    julian_files = [open(return_good_path('misc'), 'w')]
 
-lines_written = [0] * len(julian_files)
+    for k in range(1, 366):
+        julian_files.append(open(return_good_path(k), 'w'))
+        julian_files[k].write('[\n')
 
-with open('./data/ship_lines_2011.json', 'r') as infile:
-    for line in infile:
-        data = json.loads(line)
-        prop = data['properties']
-        start = parser.parse(prop['trackStartTime'])
-        end = parser.parse(prop['trackEndTime'])
-        start_day = start.timetuple().tm_yday
-        end_day = end.timetuple().tm_yday
-        print(start_day, end_day)
-        for jday in range(start_day, end_day + 1):
-            try:
-                if lines_written[jday] == 0:
-                    # julian_files[jday].write(line.strip())
-                    julian_files[jday].write(strip_line(line))
-                else:
-                    julian_files[jday].write(',\n' + strip_line(line))
-                lines_written[jday] += 1
-            except ValueError:
-                print('Failed on index: ', jday)
+    lines_written = [0] * len(julian_files)
 
-for item in julian_files:
-    item.write(']')
-    item.close()
+    with open(input_file, 'r') as infile:
+        for line in infile:
+            data = json.loads(line)
+            prop = data['properties']
+            start = parser.parse(prop['trackStartTime'])
+            end = parser.parse(prop['trackEndTime'])
+            start_day = start.timetuple().tm_yday
+            end_day = end.timetuple().tm_yday
+            print(start_day, end_day)
+            for jday in range(start_day, end_day + 1):
+                try:
+                    if lines_written[jday] == 0:
+                        # julian_files[jday].write(line.strip())
+                        julian_files[jday].write(strip_line(line))
+                    else:
+                        julian_files[jday].write(',\n' + strip_line(line))
+                    lines_written[jday] += 1
+                except ValueError:
+                    print('Failed on index: ', jday)
+
+    for item in julian_files:
+        item.write(']')
+        item.close()
 
 
-for index, item in enumerate(lines_written):
-    print('{} {}'.format(index, item))
+    for index, item in enumerate(lines_written):
+        print('{} {}'.format(index, item))
+
+
+if __name__ == '__main__':
+    main(input_file)
