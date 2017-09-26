@@ -76,6 +76,14 @@ function main() {
   const outputDay = pad(generateDay);
   const outputLocation = `../output/${year}/${outputDay}.png`
 
+  /* Viewport settings */
+  /* All of the ocean
+  const scale = 2000;       // some arbitrary number
+  const center = [-72, 34]; // in Long, Lat format
+   */
+  const scale = 6000;
+  const center = [-70.588, 41.798];
+
   const showHurricanes = true;
   const showShipTracks = true;
   const showCountries = true;
@@ -103,8 +111,7 @@ function main() {
   var path = d3.geoPath(projection);
 
   projection.fitSize([width, height], boundingBox);
-  projection.center([-72, 34]);
-  projection.scale(2000);
+  projection.center(center).scale(scale);
 
   if (showCountries === true) {
     svg.append("path")
