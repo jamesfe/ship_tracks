@@ -1,3 +1,4 @@
+const D3Node = require('d3-node');
 var d3 = require('d3');
 var fs = require('fs');
 
@@ -22,6 +23,7 @@ function pad(n) {
   }
 }
 
+/* TODO: Curry this */
 function addDays(days) {
   /* Add a certain number of days to teh first of 2013 */
   var dat = new Date(2013, 0, 0);
@@ -29,28 +31,34 @@ function addDays(days) {
   return dat;
 }
 
-
-
 function main() {
   /* Parse arguments */
-  var generateDay = parseInt(process.argv[2]);
+  const generateDay = parseInt(process.argv[2]);
   if (generateDay === undefined) {
     throw Error('no day');
   }
+  const year = '2013'
+  const countriesFile = '../data/countries/countries.geo.json';
+  const tgt_day_file = `../data/daily_${year}/${generateDay}.json`
+  // const tgt_day_file = `../data/2011daily/${generateDay}.json`
+  const hurricaneFile = '../data/hurricanes.geo.json';
 
+  const outputDay = pad(generateDay);
+  const outputLocation = `../output/${year}/${outputDay}.png`
 
-  var outputDay = pad(generateDay);
+  const showHurricanes = true;
+  const showShipTracks = true;
+  const showCountries = true;
+  const width =  800;
+  const height =  800;
+  const month = addDays(generateDay).getMonth() + 1;
+  const day = addDays(generateDay).getDate();
+  const dstring = `${month}/${day}/${year}`;
 
-  var showShipTracks = true;
-  var showCountries = true;
-  var width =  800;
-  var height =  800;
-
-  var styles = {
+  const styles = {
     styles: ' .blah { fill: #8c8e91; stroke: #2c2d2d; stroke-width: 2px } .lines { fill: none; stroke: #4c6363; stroke-width: .5px; } .sea { fill: #88baea; } .bord { fill: none; stroke: black; stroke-width: 10px; }'
   }
 
-  const D3Node = require('d3-node');
   const d3n = new D3Node(styles);
   var svg = d3n.createSVG(width, height);
 
@@ -61,10 +69,6 @@ function main() {
     .attr("height", height)
     .attr("class", "sea");
 
-  var month = addDays(generateDay).getMonth() + 1;
-  var day = addDays(generateDay).getDate();
-
-  var dstring = `${month}/${day}/2013`;
   svg.append("text")
     .attr("x", width-10)
     .attr("y", height-10)
@@ -75,11 +79,8 @@ function main() {
     .text(dstring);
 
   /* Draw the country boundaries */
-  var countriesFile = '../data/countries/countries.geo.json';
-
   var countriesFileData = fs.readFileSync(countriesFile, 'utf-8');
-  var countriesData = JSON.parse(countriesFileData);
-  var features = countriesData.features;
+  var features = JSON.parse(countriesFileData).features;
 
   var projection = d3.geoEquirectangular();
   var path = d3.geoPath(projection);
@@ -94,11 +95,8 @@ function main() {
       .attr("d", path)
       .attr("class", "blah");
   }
-  tgt_day_file = `../data/daily_2013/${generateDay}.json`
-  // tgt_day_file = `../data/2011daily/${generateDay}.json`
 
   /* Read the ship lines file synchronously */
-
   var shipFileData = fs.readFileSync(tgt_day_file, 'utf-8');
   shipData = JSON.parse(shipFileData);
   var lines = shipData.map(function(a) { return a.geometry; });
@@ -109,32 +107,26 @@ function main() {
       .attr("class", "lines");
   }
 
-  /* Now we render some hurricanes. */
-  var hurricaneFile = '../data/hurricanes.geo.json';
-
-  var hdata = fs.readFileSync(hurricaneFile, 'utf-8');
-  var hurricaneData = JSON.parse(hdata);
-
-  var checkDate = function(obj) {
-    if ((parseInt(obj.properties.day) ===  day) && (parseInt(obj.properties.month)  === month)) {
-      return true;
+  /* Now render some hurricanes. */
+  if (showHurricanes === true) {
+    function checkDate(obj) {
+      if ((parseInt(obj.properties.day) ===  day) && (parseInt(obj.properties.month)  === month)) {
+        return true;
+      }
+      return false;
     }
-    return false;
+    const hurricaneData = JSON.parse(fs.readFileSync(hurricaneFile, 'utf-8'));
+    const hfeatures = hurricaneData.filter(checkDate);
+    svg.selectAll("circle4")
+      .data(hfeatures).enter()
+      .append("circle")
+      .attr("cx", function (d) { return projection(d.geometry.coordinates)[0]; })
+      .attr("cy", function (d) { return projection(d.geometry.coordinates)[1]; })
+      .attr("r", function (d) { return (d.properties.windspeed/3) + "px"; })
+      .attr("fill", "#e04314")
   }
 
-  var hfeatures = hurricaneData.filter(checkDate);
-
-  svg.selectAll("circle4")
-    .data(hfeatures).enter()
-    .append("circle")
-    .attr("cx", function (d) { return projection(d.geometry.coordinates)[0]; })
-    .attr("cy", function (d) { return projection(d.geometry.coordinates)[1]; })
-    .attr("r", function (d) { return (d.properties.windspeed/3) + "px"; })
-    .attr("fill", "#e04314")
-
-
   /* Draw a box around everything. */
-
   svg.append("rect")
     .attr("x", 0)
     .attr("y", 0)
@@ -143,9 +135,10 @@ function main() {
     .attr("class", "bord");
 
   /* Output a SVG in PNG format. */
+  console.log(`outputting to ${outputLocation}`);
   const svg2png = require("svg2png");
     svg2png(d3n.svgString())
-      .then(buffer => fs.writeFileSync(`../output/2011/${outputDay}.png`, buffer))
+      .then(buffer => fs.writeFileSync(outputLocation, buffer))
       .catch(e => console.error(e));
 }
 
