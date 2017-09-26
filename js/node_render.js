@@ -14,6 +14,7 @@ var boundingBox = {
     };
 
 function pad(n) {
+  /* Pad a number up to 3 spaces */
   if (n < 10) {
     return ("00" + n); }
   else {
@@ -22,6 +23,7 @@ function pad(n) {
 }
 
 function addDays(days) {
+  /* Add a certain number of days to teh first of 2013 */
   var dat = new Date(2013, 0, 0);
   dat.setDate(dat.getDate() + days);
   return dat;
@@ -104,7 +106,7 @@ if (showShipTracks === true) {
 }
 
 /* Now we render some hurricanes. */
-var hurricaneFile = './public/assets/data/hurricanes.geojson';
+var hurricaneFile = './public/assets/data/hurricanes.geo.json';
 
 var hdata = fs.readFileSync(hurricaneFile, 'utf-8');
 var hurricaneData = JSON.parse(hdata);
