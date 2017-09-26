@@ -68,7 +68,8 @@ function main() {
     throw Error('no day');
   }
   const year = '2013'
-  const countriesFile = '../data/countries/countries.geo.json';
+  // const countriesFile = '../data/countries/countries.geo.json';
+  const countriesFile = '../data/just_ny_area.geojson';
   const tgt_day_file = `../data/daily_${year}/${generateDay}.json`
   // const tgt_day_file = `../data/2011daily/${generateDay}.json`
   const hurricaneFile = '../data/hurricanes.geo.json';
@@ -81,8 +82,9 @@ function main() {
   const scale = 2000;       // some arbitrary number
   const center = [-72, 34]; // in Long, Lat format
    */
-  const scale = 6000;
-  const center = [-70.588, 41.798];
+  // const scale = 10000;
+  // const center = [-73.689, 40.372]; // nyc
+  const center = [-73.8395, 40.564702]; const scale = 40000;
 
   const showHurricanes = true;
   const showShipTracks = true;
@@ -112,6 +114,7 @@ function main() {
 
   projection.fitSize([width, height], boundingBox);
   projection.center(center).scale(scale);
+  console.log(`Center: ${projection.center()} Scale: ${projection.scale()}`);
 
   if (showCountries === true) {
     svg.append("path")
