@@ -2,6 +2,36 @@ const D3Node = require('d3-node');
 var d3 = require('d3');
 var fs = require('fs');
 
+function drawBox(svg, width, height) {
+  /* Draw a box around everything. */
+  svg.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", height)
+    .attr("class", "bord");
+}
+
+function drawOcean(svg, width, height) {
+  svg.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("class", "sea");
+}
+
+function addDateText(svg, width, height, dstring) {
+  svg.append("text")
+    .attr("x", width-10)
+    .attr("y", height-10)
+    .attr("font-family", "Roboto, sans-serif")
+    .attr("font-size", "36px")
+    .attr("text-anchor", "end")
+    .attr("fill", "black")
+    .text(dstring);
+}
+
 var boundingBox = {
       "type": "Feature",
       "geometry": {
@@ -62,21 +92,8 @@ function main() {
   const d3n = new D3Node(styles);
   var svg = d3n.createSVG(width, height);
 
-  svg.append("rect")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", width)
-    .attr("height", height)
-    .attr("class", "sea");
-
-  svg.append("text")
-    .attr("x", width-10)
-    .attr("y", height-10)
-    .attr("font-family", "Roboto, sans-serif")
-    .attr("font-size", "36px")
-    .attr("text-anchor", "end")
-    .attr("fill", "black")
-    .text(dstring);
+  drawOcean(svg, width, height);
+  addDateText(svg, width, height, dstring);
 
   /* Draw the country boundaries */
   var countriesFileData = fs.readFileSync(countriesFile, 'utf-8');
@@ -126,13 +143,7 @@ function main() {
       .attr("fill", "#e04314")
   }
 
-  /* Draw a box around everything. */
-  svg.append("rect")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", width)
-    .attr("height", height)
-    .attr("class", "bord");
+  drawBox(svg, width, height);
 
   /* Output a SVG in PNG format. */
   console.log(`outputting to ${outputLocation}`);
