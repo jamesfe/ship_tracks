@@ -2,7 +2,7 @@
 for i in `seq 1 365`;
 do
 	printf $i" "
-	node ./src/node_render.js $i
+	node ./node_render.js $i
 done
 
 # Make it
