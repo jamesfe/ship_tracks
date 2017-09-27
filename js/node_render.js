@@ -85,7 +85,8 @@ function main() {
    */
   // const scale = 10000;
   // const center = [-73.689, 40.372]; // nyc
-  const center = [-73.8395, 40.564702]; const scale = 40000;
+  // const center = [-73.8395, 40.564702]; const scale = 40000;
+  const center = [-73.9398, 40.5055]; const scale = 110000;
 
   const showHurricanes = true;
   const showShipTracks = true;
