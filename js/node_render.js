@@ -1,3 +1,4 @@
+const startTime = Date.now()
 const D3Node = require('d3-node');
 var d3 = require('d3');
 var fs = require('fs');
@@ -164,3 +165,7 @@ function main() {
 }
 
 main();
+
+
+const endTime = Date.now()
+console.log(`Processing took ${endTime - startTime}ms.`)
