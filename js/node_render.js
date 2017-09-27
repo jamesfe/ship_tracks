@@ -98,7 +98,12 @@ function main() {
   const dstring = `${month}/${day}/${year}`;
 
   const styles = {
-    styles: ' .blah { fill: #8c8e91; stroke: #2c2d2d; stroke-width: 2px } .lines { fill: none; stroke: #4c6363; stroke-width: .5px; } .sea { fill: #88baea; } .bord { fill: none; stroke: black; stroke-width: 10px; }'
+    styles: `
+      .country { fill: #8c8e91; stroke: #2c2d2d; stroke-width: 2px }
+      .fullline { fill: none; stroke-opacity: 0.5; stroke: #000000; stroke-width: .3px; }
+      .pastline { fill: none; stroke-opacity: 0.1; stroke: #000000; stroke-width: .3px; }
+      .sea { fill: #88baea; } .bord { fill: none; stroke: black; stroke-width: 10px; }
+      `
   }
 
   const d3n = new D3Node(styles);
@@ -109,7 +114,7 @@ function main() {
 
   /* Draw the country boundaries */
   var countriesFileData = fs.readFileSync(countriesFile, 'utf-8');
-  var features = JSON.parse(countriesFileData).features;
+  var countryFeatures = JSON.parse(countriesFileData).features;
 
   var projection = d3.geoEquirectangular();
   var path = d3.geoPath(projection);
@@ -120,10 +125,25 @@ function main() {
 
   if (showCountries === true) {
     svg.append("path")
-      .datum({type: "FeatureCollection", features: features})
+      .datum({type: "FeatureCollection", features: countryFeatures})
       .attr("d", path)
-      .attr("class", "blah");
+      .attr("class", "country");
   }
+
+  if (generateDay > 1) {
+    const previousDay = `../data/daily_${year}/${generateDay - 1}.json`
+    var shipFileData = fs.readFileSync(previousDay, 'utf-8');
+    shipData = JSON.parse(shipFileData);
+    var lines = shipData.map(function(a) { return a.geometry; });
+    if (showShipTracks === true) {
+      svg.append("path")
+        .datum({type: "FeatureCollection", features: shipData})
+        .attr("d", path)
+        .attr("class", "pastline");
+    }
+  }
+
+
 
   /* Read the ship lines file synchronously */
   var shipFileData = fs.readFileSync(tgt_day_file, 'utf-8');
@@ -133,7 +153,7 @@ function main() {
     svg.append("path")
       .datum({type: "FeatureCollection", features: shipData})
       .attr("d", path)
-      .attr("class", "lines");
+      .attr("class", "fullline");
   }
 
   /* Now render some hurricanes. */
