@@ -68,6 +68,24 @@ function main() {
   if (generateDay === undefined) {
     throw Error('no day');
   }
+
+  /* Viewport settings */
+  /* All of the ocean
+  const scale = 2000;       // some arbitrary number
+  const center = [-72, 34]; // in Long, Lat format
+   */
+  // const scale = 10000;
+  // const center = [-73.689, 40.372]; // nyc
+  // const center = [-73.8395, 40.564702]; const scale = 40000; // NYC large view
+  // const center = [-73.9398, 40.5055]; const scale = 110000;     // Focus on outer NY harbor
+  const center = [-73.994447,40.7417605]; const scale = 120000; // manhattan harbor
+  if (process.argv[3] !== undefined) {
+    center = process.argv[3].split(',').map(_ => parseFloat(_))
+  }
+  if (process.argv[4] !== undefined) {
+    scale = parseInt(process.argv[4])
+  }
+
   const year = '2013'
   // const countriesFile = '../data/countries/countries.geo.json';
   const countriesFile = '../data/just_ny_area.geojson';
@@ -78,15 +96,6 @@ function main() {
   const outputDay = pad(generateDay);
   const outputLocation = `../output/${year}/${outputDay}.png`
 
-  /* Viewport settings */
-  /* All of the ocean
-  const scale = 2000;       // some arbitrary number
-  const center = [-72, 34]; // in Long, Lat format
-   */
-  // const scale = 10000;
-  // const center = [-73.689, 40.372]; // nyc
-  // const center = [-73.8395, 40.564702]; const scale = 40000;
-  const center = [-73.9398, 40.5055]; const scale = 110000;
 
   const showHurricanes = true;
   const showShipTracks = true;
