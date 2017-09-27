@@ -2,6 +2,14 @@ const startTime = Date.now()
 const D3Node = require('d3-node');
 var d3 = require('d3');
 var fs = require('fs');
+const svg2png = require("svg2png");
+
+function saveImage(outputLoc, svgString) {
+  console.log(`outputting to ${outputLoc}`);
+  svg2png(svgString)
+    .then(buffer => fs.writeFileSync(outputLoc, buffer))
+    .catch(e => console.error(e));
+}
 
 function drawBox(svg, width, height) {
   /* Draw a box around everything. */
@@ -97,7 +105,7 @@ function main() {
   const outputDay = pad(generateDay);
   const outputLocation = `../output/${year}/${outputDay}.png`
 
-  const showHurricanes = true;
+  const showHurricanes = false;
   const showShipTracks = true;
   const showCountries = true;
   const width =  800;
@@ -153,8 +161,6 @@ function main() {
     }
   }
 
-
-
   /* Read the ship lines file synchronously */
   var shipFileData = fs.readFileSync(tgt_day_file, 'utf-8');
   shipData = JSON.parse(shipFileData);
@@ -187,16 +193,18 @@ function main() {
 
   drawBox(svg, width, height);
 
+  saveImage(outputLocation, d3n.svgString())
+
   /* Output a SVG in PNG format. */
+  /*
   console.log(`outputting to ${outputLocation}`);
-  const svg2png = require("svg2png");
-    svg2png(d3n.svgString())
-      .then(buffer => fs.writeFileSync(outputLocation, buffer))
-      .catch(e => console.error(e));
+  svg2png(d3n.svgString())
+    .then(buffer => fs.writeFileSync(outputLocation, buffer))
+    .catch(e => console.error(e));
+  */
 }
 
 main();
-
 
 const endTime = Date.now()
 console.log(`Processing took ${endTime - startTime}ms.`)
