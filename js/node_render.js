@@ -78,7 +78,7 @@ function main() {
   // const center = [-73.689, 40.372]; // nyc
   // const center = [-73.8395, 40.564702]; const scale = 40000; // NYC large view
   // const center = [-73.9398, 40.5055]; const scale = 110000;     // Focus on outer NY harbor
-  const center = [-73.994447,40.7417605]; const scale = 120000; // manhattan harbor
+  const center = [-74.0333747,40.685949]; const scale = 270000; // manhattan harbor
   if (process.argv[3] !== undefined) {
     center = process.argv[3].split(',').map(_ => parseFloat(_))
   }
@@ -88,14 +88,14 @@ function main() {
 
   const year = '2013'
   // const countriesFile = '../data/countries/countries.geo.json';
-  const countriesFile = '../data/just_ny_area.geojson';
+  // const countriesFile = '../data/just_ny_area.geojson';
+  const countriesFile = '../data/countries/just_nyc_area_maritime_osm.geojson';
   const tgt_day_file = `../data/daily_${year}/${generateDay}.json`
   // const tgt_day_file = `../data/2011daily/${generateDay}.json`
   const hurricaneFile = '../data/hurricanes.geo.json';
 
   const outputDay = pad(generateDay);
   const outputLocation = `../output/${year}/${outputDay}.png`
-
 
   const showHurricanes = true;
   const showShipTracks = true;
@@ -109,8 +109,8 @@ function main() {
   const styles = {
     styles: `
       .country { fill: #8c8e91; stroke: #2c2d2d; stroke-width: 2px }
-      .fullline { fill: none; stroke-opacity: 0.5; stroke: #000000; stroke-width: .3px; }
-      .pastline { fill: none; stroke-opacity: 0.1; stroke: #000000; stroke-width: .3px; }
+      .fullline { fill: none; stroke-opacity: 0.2; stroke: #000000; stroke-width: .3px; }
+      .pastline { fill: none; stroke-opacity: 0.05; stroke: #000000; stroke-width: .3px; }
       .sea { fill: #88baea; } .bord { fill: none; stroke: black; stroke-width: 10px; }
       `
   }
@@ -119,7 +119,6 @@ function main() {
   var svg = d3n.createSVG(width, height);
 
   drawOcean(svg, width, height);
-  addDateText(svg, width, height, dstring);
 
   /* Draw the country boundaries */
   var countriesFileData = fs.readFileSync(countriesFile, 'utf-8');
@@ -138,6 +137,8 @@ function main() {
       .attr("d", path)
       .attr("class", "country");
   }
+
+  addDateText(svg, width, height, dstring);
 
   if (generateDay > 1) {
     const previousDay = `../data/daily_${year}/${generateDay - 1}.json`
