@@ -6,8 +6,7 @@ var fs = require('fs');
 var geolib = require('geolib');
 var readline = require('readline');
 
-
-function lineHandler(line) {
+function lineHandler (line) {
   /*
    * Input: A line which is valid JSON and a valid GeoJSON line geometry
    * Output: A map containing time keys (ex below) and valid GeoJSON geometries
@@ -16,9 +15,11 @@ function lineHandler(line) {
   console.log(line);
 }
 
+function bucketToHours (blah) {
 
-function main(targetFile) {
+}
 
+function main (targetFile) {
   var lineReader = readline.createInterface({
     input: fs.createReadStream(targetFile)
   });
@@ -26,7 +27,7 @@ function main(targetFile) {
   lineReader.on('line', lineHandler);
 
   var hourlyFeatures = new Map();
-  while(morevals) {
+  while (morevals) {
     var feature = get(blah);
     var tempHourly = bucketToHours(feature);
     tempHourly.forEach((key, value) => hourlyFeatures[key].append(value));
@@ -34,7 +35,7 @@ function main(targetFile) {
   // save to file
 }
 
-function connectEdges(inputArray) {
+function connectEdges (inputArray) {
   /* Take a list of vertices and return a list of line objects. */
   var retVals = [];
   for (var i = 0; i < inputArray.length - 1; i++) {
@@ -43,12 +44,12 @@ function connectEdges(inputArray) {
       longitude: inputArray[i].lon
     };
     var d2 = {
-      latitude: inputArray[i+1].lat,
-      longitude: inputArray[i+1].lon
+      latitude: inputArray[i + 1].lat,
+      longitude: inputArray[i + 1].lon
     };
 
     var distance = geolib.getDistance(d1, d2);
-    var seconds = (inputArray[i + 1].datetime - inputArray[i].datetime ) / 1000;
+    var seconds = (inputArray[i + 1].datetime - inputArray[i].datetime) / 1000;
     if (seconds <= 0) {
       seconds = 0.1;
     }
@@ -67,11 +68,11 @@ function connectEdges(inputArray) {
   return retVals;
 }
 
-function loadDataAndSegment() {
+function loadDataAndSegment () {
   var edges;
-  d3.xml('./data/jfk50miler.gpx', function(error, data) {
+  d3.xml('./data/jfk50miler.gpx', function (error, data) {
     if (error) throw error;
-    data = [].map.call(data.querySelectorAll('trkpt'), function(point) {
+    data = [].map.call(data.querySelectorAll('trkpt'), function (point) {
       return {
         lat: parseFloat(point.getAttribute('lat')),
         lon: parseFloat(point.getAttribute('lon')),
@@ -80,7 +81,7 @@ function loadDataAndSegment() {
         hr: parseInt(point.querySelector('extensions').childNodes[1].childNodes[1].textContent)
       };
     });
-    data.sort(function(b, a){
+    data.sort(function (b, a){
       return new Date(b.datetime) - new Date(a.datetime);
     });
     edges = connectEdges(data);
@@ -90,7 +91,7 @@ function loadDataAndSegment() {
   return edges;
 }
 
-function addSeconds(item, seconds) {
+function addSeconds (item, seconds) {
   /* Add seconds to a date object and return a new date. */
   if (item instanceof Date === false) { throw "not given a date"; }
   var newDate = new Date();
@@ -98,7 +99,7 @@ function addSeconds(item, seconds) {
   return newDate;
 }
 
-function splitSegment(seg, seconds) {
+function splitSegment (seg, seconds) {
   /* Split the segment by removing the first n seconds. Return two new lightweight objects. */
   if (seg.seconds <= seconds) {
     throw 'bad split value';
@@ -117,7 +118,7 @@ function splitSegment(seg, seconds) {
   ];
 }
 
-function makeBuckets(items, numBuckets) {
+function makeBuckets (items, numBuckets) {
 	/* Returns an array of items with length numBuckets */
   numBuckets = Math.floor(numBuckets);
   // Do not modify the original array.  Copy it.
@@ -165,10 +166,10 @@ function makeBuckets(items, numBuckets) {
     if (componentSegs.length === 1) {
       retVals[i] = componentSegs[0];
     } else {
-      var distance = componentSegs.reduce(function(s, v) {
+      var distance = componentSegs.reduce(function (s, v) {
         return (s + v.distance);
       }, 0);
-      var seconds = componentSegs.reduce(function(s, v) {
+      var seconds = componentSegs.reduce(function (s, v) {
         return (s + v.seconds);
       }, 0);
       // Set the value to the sum of everything.
@@ -180,15 +181,15 @@ function makeBuckets(items, numBuckets) {
   }
 
   // Given an array of nearly final data, make it into graphable speeds.
-  var speeds = retVals.map(function(a, i) {
+  var speeds = retVals.map(function (a, i) {
     var dt = new Date();
     dt.setTime(startDate.getTime() + (i * secondsPerBucket * 1000));
-		return {
-			value: (a.distance / a.seconds),
-			date: dt
-		};
-	});
-	return speeds;
+    return {
+      value: (a.distance / a.seconds),
+      date: dt
+    };
+  });
+  return speeds;
 }
 
 
