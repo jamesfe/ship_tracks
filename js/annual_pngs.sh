@@ -1,5 +1,5 @@
 #!/bin/bash
-for i in `seq 69 365`;
+for i in `seq 1 365`;
 do
 	printf $i" "
 	node ./node_render.js $i
