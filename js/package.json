@@ -7,6 +7,7 @@
     "start": "node_modules/webpack-dev-server/bin/webpack-dev-server.js",
     "webpack": "./node_modules/.bin/webpack --config webpack.config.js --watch",
     "lint": "./node_modules/eslint/bin/eslint.js *.js",
+    "lintseg": "./node_modules/eslint/bin/eslint.js segmentSplitter.js",
     "test": "mocha"
   },
   "author": "jamesfe",
@@ -23,7 +24,8 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "jshint": "^2.9.5",
-    "jshint-loader": "^0.8.4"
+    "jshint-loader": "^0.8.4",
+    "n-readlines": "^0.2.8"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
