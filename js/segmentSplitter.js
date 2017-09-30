@@ -4,7 +4,7 @@
 
 var fs = require('fs');
 var geolib = require('geolib');
-var readline = require('readline');
+var lineByLine = require('n-readlines');
 
 function lineHandler (line) {
   /*
@@ -15,24 +15,19 @@ function lineHandler (line) {
   console.log(line);
 }
 
-function bucketToHours (blah) {
-
+function bucketToHours (inString) {
+  var feature = JSON.parse(inString);
+  return (feature);
 }
 
 function main (targetFile) {
-  var lineReader = readline.createInterface({
-    input: fs.createReadStream(targetFile)
-  });
-
-  lineReader.on('line', lineHandler);
+  var lineReader = new lineByLine('./textFile.txt');
 
   var hourlyFeatures = new Map();
-  while (morevals) {
-    var feature = get(blah);
-    var tempHourly = bucketToHours(feature);
+  while (line = lineReader.next()) {
+    var tempHourly = bucketToHours(line);
     tempHourly.forEach((key, value) => hourlyFeatures[key].append(value));
   }
-  // save to file
 }
 
 function connectEdges (inputArray) {
