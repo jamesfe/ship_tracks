@@ -2,29 +2,31 @@
  * First: This is a world of [lat, lon] coordinates.
  * */
 
-var fs = require('fs');
 var geolib = require('geolib');
-var lineByLine = require('n-readlines');
+var LineByLine = require('n-readlines');
 
-function lineHandler (line) {
+function lineHandler (inLine) {
   /*
    * Input: A line which is valid JSON and a valid GeoJSON line geometry
    * Output: A map containing time keys (ex below) and valid GeoJSON geometries
    * Time Key: YYYY-MM-DD-HH_to_YYYY-MM-DD-HH
    * */
-  console.log(line);
-}
 
-function bucketToHours (inString) {
-  var feature = JSON.parse(inString);
+  var feature = JSON.parse(inLine);
+  console.log(inLine);
   return (feature);
 }
 
+function bucketToHours (inString) {
+  return (inString);
+}
+
 function main (targetFile) {
-  var lineReader = new lineByLine('./textFile.txt');
+  var lineReader = new LineByLine('./textFile.txt');
 
   var hourlyFeatures = new Map();
   while (line = lineReader.next()) {
+    var lineData = lineHandler(line);
     var tempHourly = bucketToHours(line);
     tempHourly.forEach((key, value) => hourlyFeatures[key].append(value));
   }
@@ -54,7 +56,7 @@ function connectEdges (inputArray) {
 
     var newItem = {
       startPoint: inputArray[i],
-      stopPoint: inputArray[i+1],
+      stopPoint: inputArray[i + 1],
       distance: distance,
       seconds: seconds
     };
@@ -65,30 +67,29 @@ function connectEdges (inputArray) {
 
 function loadDataAndSegment () {
   var edges;
-  d3.xml('./data/jfk50miler.gpx', function (error, data) {
-    if (error) throw error;
-    data = [].map.call(data.querySelectorAll('trkpt'), function (point) {
-      return {
-        lat: parseFloat(point.getAttribute('lat')),
-        lon: parseFloat(point.getAttribute('lon')),
-        elevation: parseFloat(point.querySelector('ele').textContent),
-        datetime: addSeconds(new Date(point.querySelector('time').textContent), -1 * 5 * 3600),
-        hr: parseInt(point.querySelector('extensions').childNodes[1].childNodes[1].textContent)
-      };
-    });
-    data.sort(function (b, a){
-      return new Date(b.datetime) - new Date(a.datetime);
-    });
-    edges = connectEdges(data);
-    // edges contains a list of starting and ending times plus distance gone and seconds
-    renderSegmentedGraph(edges, 'running_segments', 98, edges[0].startPoint.datetime);
+  //d3.xml('./data/jfk50miler.gpx', function (error, data) {
+  data = [].map.call(data.querySelectorAll('trkpt'), function (point) {
+    return {
+      lat: parseFloat(point.getAttribute('lat')),
+      lon: parseFloat(point.getAttribute('lon')),
+      elevation: parseFloat(point.querySelector('ele').textContent),
+      datetime: addSeconds(new Date(point.querySelector('time').textContent), -1 * 5 * 3600),
+      hr: parseInt(point.querySelector('extensions').childNodes[1].childNodes[1].textContent)
+    };
   });
+  data.sort(function (b, a){
+    return new Date(b.datetime) - new Date(a.datetime);
+  });
+  var edges = connectEdges(data);
+  // edges contains a list of starting and ending times plus distance gone and seconds
+  renderSegmentedGraph(edges, 'running_segments', 98, edges[0].startPoint.datetime);
+  // });
   return edges;
 }
 
 function addSeconds (item, seconds) {
   /* Add seconds to a date object and return a new date. */
-  if (item instanceof Date === false) { throw "not given a date"; }
+  if (item instanceof Date === false) { throw 'not given a date'; }
   var newDate = new Date();
   newDate.setTime(item.getTime() + (seconds * 1000));
   return newDate;
@@ -109,12 +110,12 @@ function splitSegment (seg, seconds) {
     {
       distance: seg.distance * (1 - ratio),
       seconds: seg.seconds - seconds
-    },
+    }
   ];
 }
 
 function makeBuckets (items, numBuckets) {
-	/* Returns an array of items with length numBuckets */
+  /* Returns an array of items with length numBuckets */
   numBuckets = Math.floor(numBuckets);
   // Do not modify the original array.  Copy it.
 
@@ -186,6 +187,5 @@ function makeBuckets (items, numBuckets) {
   });
   return speeds;
 }
-
 
 main();
