@@ -2,8 +2,20 @@
  * First: This is a world of [lat, lon] coordinates.
  * */
 
+const LAT = 0;
+const LONG = 1;
+
 var geolib = require('geolib');
 var LineByLine = require('n-readlines');
+
+function fullDateToDailyDate (inDate) {
+  /* Takes a date and returns just the day/month/year part as a Date object  */
+  return new Date(inDate.getYear(), inDate.getMonth(), inDate.getDate());
+}
+
+function formatToDatePlusHours (inDate) {
+  return inDate.toString();
+}
 
 function lineHandler (inLine) {
   /*
@@ -11,14 +23,30 @@ function lineHandler (inLine) {
    * Output: A map containing time keys (ex below) and valid GeoJSON geometries
    * Time Key: YYYY-MM-DD-HH_to_YYYY-MM-DD-HH
    * */
-
   var feature = JSON.parse(inLine);
   console.log(inLine);
   return (feature);
 }
 
-function bucketToHours (inString) {
-  return (inString);
+function bucketToHours (inFeature) {
+  const coordinates = inFeature.geometry.coordinates[0];
+  const startTime = Date.parse(inFeature.properties.trackStartTime);
+  const endTime = Date.parse(inFeature.properties.trackEndTime);
+
+  const bucketStart = fullDateToDailyDate(startTime).setHours(startTime.getHours());
+  var currentBucket = bucketStart;
+  var buckets = new Map();
+  while (endTime < currentBucket) {
+    /* We create a map of hours where we will put segments. */
+    /* The bucket contains segments which occur in the 60 minutes after the key. */
+    const formattedDate = formatToDatePlusHours(currentBucket);
+    buckets[formattedDate] = []; // an empty array to which we will append coordinates.
+    currentBucket.setHours(currentBucket.getHours() + 1); // TODO: does this work??
+  }
+
+  // TODO: cutting.
+
+  return buckets;
 }
 
 function main (targetFile) {
@@ -26,8 +54,8 @@ function main (targetFile) {
 
   var hourlyFeatures = new Map();
   while (line = lineReader.next()) {
-    var lineData = lineHandler(line);
-    var tempHourly = bucketToHours(line);
+    var feature = lineHandler(line);
+    var tempHourly = bucketToHours(feature);
     tempHourly.forEach((key, value) => hourlyFeatures[key].append(value));
   }
 }
