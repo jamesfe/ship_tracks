@@ -65,15 +65,16 @@ function connectEdges (inputArray) {
   var retVals = [];
   for (var i = 0; i < inputArray.length - 1; i++) {
     var d1 = {
-      latitude: inputArray[i].lat,
-      longitude: inputArray[i].lon
+      latitude: inputArray[i][LAT],
+      longitude: inputArray[i][LON]
     };
     var d2 = {
-      latitude: inputArray[i + 1].lat,
-      longitude: inputArray[i + 1].lon
+      latitude: inputArray[i + 1][LAT],
+      longitude: inputArray[i + 1][LON]
     };
 
     var distance = geolib.getDistance(d1, d2);
+    // TODO: Infer from the total segment how many m/s the ship was traveling.
     var seconds = (inputArray[i + 1].datetime - inputArray[i].datetime) / 1000;
     if (seconds <= 0) {
       seconds = 0.1;
@@ -91,36 +92,6 @@ function connectEdges (inputArray) {
     retVals.push(newItem);
   }
   return retVals;
-}
-
-function loadDataAndSegment () {
-  var edges;
-  //d3.xml('./data/jfk50miler.gpx', function (error, data) {
-  data = [].map.call(data.querySelectorAll('trkpt'), function (point) {
-    return {
-      lat: parseFloat(point.getAttribute('lat')),
-      lon: parseFloat(point.getAttribute('lon')),
-      elevation: parseFloat(point.querySelector('ele').textContent),
-      datetime: addSeconds(new Date(point.querySelector('time').textContent), -1 * 5 * 3600),
-      hr: parseInt(point.querySelector('extensions').childNodes[1].childNodes[1].textContent)
-    };
-  });
-  data.sort(function (b, a){
-    return new Date(b.datetime) - new Date(a.datetime);
-  });
-  var edges = connectEdges(data);
-  // edges contains a list of starting and ending times plus distance gone and seconds
-  renderSegmentedGraph(edges, 'running_segments', 98, edges[0].startPoint.datetime);
-  // });
-  return edges;
-}
-
-function addSeconds (item, seconds) {
-  /* Add seconds to a date object and return a new date. */
-  if (item instanceof Date === false) { throw 'not given a date'; }
-  var newDate = new Date();
-  newDate.setTime(item.getTime() + (seconds * 1000));
-  return newDate;
 }
 
 function splitSegment (seg, seconds) {
