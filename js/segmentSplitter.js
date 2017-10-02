@@ -33,6 +33,20 @@ function getfirstSegDistance (startTime, metersPerSecond) {
   return (firstSegmentSeconds * metersPerSecond);
 }
 
+function breakFromMain(tail, distance) {
+  /* Given an amount of distance, break up the coordinates into some of that distance
+   * plus the tail of remaining distance. */
+  var head = [];
+
+  // TODO: Break tail here
+
+  return ({
+    head: head,
+    tail: tail
+  });
+
+}
+
 function bucketToHours (inFeature) {
   const coordinates = inFeature.geometry.coordinates[0];
   const startTime = Date.parse(inFeature.properties.trackStartTime);
@@ -64,6 +78,8 @@ function bucketToHours (inFeature) {
   const mPerSecond = totalDistance / totalTimeSeconds;
   const firstSegmentDistance = getfirstSegDistance(startTime, mPerSecond);
   // TODO: use a function to pull enough points off the stack to create a feature from this.
+  const result = breakFromMain(coordinates, firstSegmentDistance)
+
 
   return buckets;
 }
