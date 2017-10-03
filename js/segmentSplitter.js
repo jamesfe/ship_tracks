@@ -37,6 +37,17 @@ function fromCoord (coord) {
     return ({ latitude: coord[LAT], longitude: coord[LON] });
 }
 
+function getSplitPoint (pt1, pt2, partialDist) {
+  /* Given two coordinate pairs and a distance, find the point on the line that is that far from
+   * pt1 in the direction of pt2 */
+  // Problem: does not account for curvature of earth
+  const totalDist = geolib.getDistance(fromCoord(pt1), fromCoord(pt2));
+  const ratio = 1 - (partialDist / totalDist);
+  const newX = ratio * (pt1[0] - pt2[0])
+  const newY = ratio * (pt1[1] - pt2[1])
+  return [newX, newY]
+}
+
 function breakFromMain(tail, distance) {
   /* Given an amount of distance, break up the coordinates into some of that distance
    * plus the tail of remaining distance. */
@@ -44,16 +55,24 @@ function breakFromMain(tail, distance) {
 
   var currentLength = 0;
   var currentIndex = 0;
-  while (currentLength < distance) {
-    if (currentIndex >= tail.length - 1) { throw 'error'; }
-    segLength = geolib.getDistance(fromCoord(tail[currentIndex]), fromCoord(tail[currentIndex]));
-    if (currentLength + segLength > distance) {
-      // TODO: Break segment
-    } else {
-      // TODO: add to head
-      // TODO: remove from tail
-    }
+  head.push(currentIndex); // initialize it
 
+  while (currentLength < distance) {
+    if (tail.length <= 1) {
+      console.log('head-tail fail');
+      break;
+    }
+    segLength = geolib.getDistance(fromCoord(tail[0]), fromCoord(tail[1]));
+    if (currentLength + segLength > distance) {
+      splitPoint = getSplitPoint(tail[0], tail[1], distance);
+      head.append(splitPoint)
+      tail[1] = splitPoint
+      // return
+    } else {
+      head.push(tail[0])
+      tail = tail.slice(1);
+      // continue going forward
+    }
   }
 
   return ({
@@ -237,3 +256,8 @@ function makeBuckets (items, numBuckets) {
   });
   return speeds;
 }
+
+
+module.exports = {
+  getSplitPoint: getSplitPoint
+};
