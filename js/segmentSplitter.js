@@ -34,7 +34,7 @@ function getfirstSegDistance (startTime, metersPerSecond) {
 }
 
 function fromCoord (coord) {
-    return ({ latitude: coord[LAT], longitude: coord[LON] });
+  return ({ latitude: coord[LAT], longitude: coord[LON] });
 }
 
 function getSplitPoint (pt1, pt2, partialDist) {
@@ -43,12 +43,12 @@ function getSplitPoint (pt1, pt2, partialDist) {
   // Problem: does not account for curvature of earth
   const totalDist = geolib.getDistance(fromCoord(pt1), fromCoord(pt2));
   const ratio = 1 - (partialDist / totalDist);
-  const newX = ratio * (pt1[0] - pt2[0])
-  const newY = ratio * (pt1[1] - pt2[1])
-  return [newX, newY]
+  const newX = ratio * (pt1[0] - pt2[0]);
+  const newY = ratio * (pt1[1] - pt2[1]);
+  return [newX, newY];
 }
 
-function breakFromMain(tail, distance) {
+function breakFromMain (tail, distance) {
   /* Given an amount of distance, break up the coordinates into some of that distance
    * plus the tail of remaining distance. */
   var head = [];
@@ -62,14 +62,14 @@ function breakFromMain(tail, distance) {
       console.log('head-tail fail');
       break;
     }
-    segLength = geolib.getDistance(fromCoord(tail[0]), fromCoord(tail[1]));
+    const segLength = geolib.getDistance(fromCoord(tail[0]), fromCoord(tail[1]));
     if (currentLength + segLength > distance) {
-      splitPoint = getSplitPoint(tail[0], tail[1], distance);
-      head.append(splitPoint)
-      tail[1] = splitPoint
+      const splitPoint = getSplitPoint(tail[0], tail[1], distance);
+      head.append(splitPoint);
+      tail[1] = splitPoint;
       // return
     } else {
-      head.push(tail[0])
+      head.push(tail[0]);
       tail = tail.slice(1);
       // continue going forward
     }
@@ -79,7 +79,6 @@ function breakFromMain(tail, distance) {
     head: head,
     tail: tail
   });
-
 }
 
 function bucketToHours (inFeature) {
@@ -113,8 +112,7 @@ function bucketToHours (inFeature) {
   const mPerSecond = totalDistance / totalTimeSeconds;
   const firstSegmentDistance = getfirstSegDistance(startTime, mPerSecond);
   // TODO: use a function to pull enough points off the stack to create a feature from this.
-  const result = breakFromMain(coordinates, firstSegmentDistance)
-
+  const result = breakFromMain(coordinates, firstSegmentDistance);
 
   return buckets;
 }
@@ -129,7 +127,6 @@ function main (targetFile) {
     tempHourly.forEach((key, value) => hourlyFeatures[key].append(value));
   }
 }
-
 
 module.exports = {
   getSplitPoint: getSplitPoint
