@@ -33,12 +33,28 @@ function getfirstSegDistance (startTime, metersPerSecond) {
   return (firstSegmentSeconds * metersPerSecond);
 }
 
+function fromCoord (coord) {
+    return ({ latitude: coord[LAT], longitude: coord[LON] });
+}
+
 function breakFromMain(tail, distance) {
   /* Given an amount of distance, break up the coordinates into some of that distance
    * plus the tail of remaining distance. */
   var head = [];
 
-  // TODO: Break tail here
+  var currentLength = 0;
+  var currentIndex = 0;
+  while (currentLength < distance) {
+    if (currentIndex >= tail.length - 1) { throw 'error'; }
+    segLength = geolib.getDistance(fromCoord(tail[currentIndex]), fromCoord(tail[currentIndex]));
+    if (currentLength + segLength > distance) {
+      // TODO: Break segment
+    } else {
+      // TODO: add to head
+      // TODO: remove from tail
+    }
+
+  }
 
   return ({
     head: head,
