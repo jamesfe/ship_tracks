@@ -1,6 +1,7 @@
 {
     "author": "jamesfe",
     "dependencies": {
+        "@turf/turf": "^4.7.3",
         "d3": "4.10.2",
         "d3-geo": "1.6.4",
         "d3-node": "1.1.1",
@@ -15,7 +16,6 @@
         "eslint-plugin-node": "5.1.1",
         "eslint-plugin-promise": "3.5.0",
         "eslint-plugin-standard": "3.0.1",
-        "geolib": "2.0.23",
         "jshint": "2.9.5",
         "jshint-loader": "0.8.4",
         "n-readlines": "0.2.8"
