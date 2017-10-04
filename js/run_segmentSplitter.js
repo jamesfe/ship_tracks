@@ -3,4 +3,5 @@
  * */
 
 const segSplitter = require('./segmentSplitter');
-segSplitter.main();
+
+segSplitter.main('../data/week/3.json');
