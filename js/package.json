@@ -1,7 +1,7 @@
 {
     "author": "jamesfe",
     "dependencies": {
-        "@turf/turf": "^4.7.3",
+        "@turf/turf": "4.7.3",
         "d3": "4.10.2",
         "d3-geo": "1.6.4",
         "d3-node": "1.1.1",
