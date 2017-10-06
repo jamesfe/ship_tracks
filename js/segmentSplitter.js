@@ -66,34 +66,26 @@ function bucketToHours (inFeature) {
 
   const totalTimeSeconds = (endTime - startTime) / 1000;
   const kmPerSecond = (distance / totalTimeSeconds) / 1000;
-  console.log(endTime, currentBucket);
-  while (endTime < currentBucket) {
-    console.log('iterating');
+
+  var firstHourSeconds = 0;
+  while (endTime.getTime() >= currentBucket.getTime()) {
     /* We create a map of hours where we will put segments. */
     /* The bucket contains segments which occur in the 60 minutes after the key. */
     buckets[currentBucket] = []; // an empty array to which we will append coordinates.
     if (count === 0) {
-      const firstHourSeconds = (startTime.getMinutes() * 60) + startTime.getSeconds();
+      firstHourSeconds = (startTime.getMinutes() * 60) + startTime.getSeconds();
       const firstDistanceKm = firstHourSeconds * kmPerSecond;
       var sliced = turf.lineSliceAlong(inFeature, 0, firstDistanceKm, 'kilometers');
-      console.log('appending');
       buckets[currentBucket].push(sliced);
     } else {
       var startSliceKm = (firstHourSeconds + (3600 * count)) * kmPerSecond;
       var endSliceKm = (firstHourSeconds + (3600 * count + 1)) * kmPerSecond;
       var sliced = turf.lineSliceAlong(inFeature, startSliceKm, endSliceKm, 'kilometers');
-      console.log('appending');
       buckets[currentBucket].push(sliced);
     }
     currentBucket.setHours(currentBucket.getHours() + 1);
     count++;
   }
-  /*
-  const firstSegmentDistance = getfirstSegDistance(startTime, mPerSecond);
-  // TODO: use a function to pull enough points off the stack to create a feature from this.
-  const result = breakFromMain(coordinates, firstSegmentDistance);
-*/
-
   return buckets;
 }
 
@@ -102,7 +94,7 @@ function main (targetFile) {
 
   var hourlyFeatures = new Map();
   // for (var i = 0; i < inData.length; i++) {
-  for (var i = 0; i < 2; i++) {
+  for (var i = 0; i < 10; i++) {
     var feature = inData[i];
     var tempHourly = bucketToHours(feature);
     console.log(tempHourly);
