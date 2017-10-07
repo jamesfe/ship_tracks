@@ -17,39 +17,6 @@ function fromCoord (coord) {
   return ({ latitude: coord[LAT], longitude: coord[LON] });
 }
 
-function breakFromMain (tail, distance) {
-  /* Given an amount of distance, break up the coordinates into some of that distance
-   * plus the tail of remaining distance. */
-  var head = [];
-
-  var currentLength = 0;
-  var currentIndex = 0;
-  head.push(currentIndex); // initialize it
-
-  while (currentLength < distance) {
-    if (tail.length <= 1) {
-      console.log('head-tail fail');
-      break;
-    }
-    const segLength = geolib.getDistance(fromCoord(tail[0]), fromCoord(tail[1]));
-    if (currentLength + segLength > distance) {
-      const splitPoint = getSplitPoint(tail[0], tail[1], distance);
-      head.append(splitPoint);
-      tail[1] = splitPoint;
-      // return
-    } else {
-      head.push(tail[0]);
-      tail = tail.slice(1);
-      // continue going forward
-    }
-  }
-
-  return ({
-    head: head,
-    tail: tail
-  });
-}
-
 function bucketToHours (inFeature) {
   const startTime = new Date(Date.parse(inFeature.properties.trackStartTime));
   const endTime = new Date(Date.parse(inFeature.properties.trackEndTime));
