@@ -7,9 +7,8 @@
  *  - These features should then be dumped to another file where they can be read by another process.
  * */
 
-const LAT = 0;
-const LON = 1;
-
+var path = require('path');
+var fs = require('fs');
 var turf = require('@turf/turf');
 
 function fullDateToDailyDate (inDate) {
@@ -18,43 +17,46 @@ function fullDateToDailyDate (inDate) {
   return new Date(inDate.getFullYear(), inDate.getMonth(), inDate.getDate());
 }
 
-function fromCoord (coord) {
-  return ({ latitude: coord[LAT], longitude: coord[LON] });
-}
-
 function bucketToHours (inFeature) {
   const startTime = new Date(Date.parse(inFeature.properties.trackStartTime));
   const endTime = new Date(Date.parse(inFeature.properties.trackEndTime));
+  console.log(startTime, endTime);
 
   const bucketStart = new Date(fullDateToDailyDate(startTime).setHours(startTime.getHours()));
-  var currentBucket = bucketStart;
+  var currentBucket = bucketStart.getTime();
   var buckets = new Map();
 
-
   const distance = turf.lineDistance(inFeature, 'kilometers');
-
+  console.log("distance", distance);
   var count = 0;
-  var currentDistanceKm = 0;
 
   const totalTimeSeconds = (endTime - startTime) / 1000;
-  const kmPerSecond = (distance / totalTimeSeconds) / 1000;
+  console.log(totalTimeSeconds);
+  const kmPerSecond = (distance / totalTimeSeconds);
+  console.log('km per second', kmPerSecond);
+  var sliced = [];
 
-  var firstHourSeconds = 0;
-  while (endTime.getTime() >= currentBucket.getTime()) {
+  const secondsMovingInFirstHour = 3600 - ((startTime.getTime() / 1000) % 3600);
+  const firstDistanceKm = secondsMovingInFirstHour * kmPerSecond;
+
+  while (currentBucket <= endTime.getTime()) {
     /* We create a map of hours where we will put segments. */
     /* The bucket contains segments which occur in the 60 minutes after the key. */
+
+    console.log('before bucket: ', new Date(currentBucket));
     if (count === 0) {
-      firstHourSeconds = (startTime.getMinutes() * 60) + startTime.getSeconds();
-      const firstDistanceKm = firstHourSeconds * kmPerSecond;
-      var sliced = turf.lineSliceAlong(inFeature, 0, firstDistanceKm, 'kilometers');
-      buckets.set(currentBucket.getTime(), sliced);
+      sliced = turf.lineSliceAlong(inFeature, 0, firstDistanceKm, 'kilometers');
+      console.log(0, firstDistanceKm);
+      buckets.set(currentBucket, sliced);
     } else {
-      var startSliceKm = (firstHourSeconds + (3600 * count)) * kmPerSecond;
-      var endSliceKm = (firstHourSeconds + (3600 * count + 1)) * kmPerSecond;
-      var sliced = turf.lineSliceAlong(inFeature, startSliceKm, endSliceKm, 'kilometers');
-      buckets.set(currentBucket.getTime(), sliced);
+      const startSliceKm = firstDistanceKm + (3600 * count * kmPerSecond);
+      const endSliceKm = startSliceKm + (3600 * kmPerSecond);
+      console.log(startSliceKm, endSliceKm);
+      sliced = turf.lineSliceAlong(inFeature, startSliceKm, endSliceKm, 'kilometers');
+      buckets.set(currentBucket, sliced);
     }
-    currentBucket.setHours(currentBucket.getHours() + 1);
+    currentBucket += (3600 * 1000); // millis in an hour
+    console.log('bucket: ', new Date(currentBucket));
     count++;
   }
   return buckets;
@@ -65,8 +67,8 @@ function main (targetFile) {
   const inData = require(targetFile);
 
   var hourlyFeatures = new Map();
-  for (var i = 0; i < inData.length; i++) {
-  //for (var i = 0; i < 10; i++) {
+  // for (var i = 0; i < inData.length; i++) {
+  for (var i = 0; i < 1; i++) {
     var feature = inData[i];
     var tempHourly = bucketToHours(feature);
     tempHourly.forEach((value, key) => {
@@ -77,9 +79,23 @@ function main (targetFile) {
       }
     });
   }
-  hourlyFeatures.forEach((v, k) => {
-    console.log(new Date(k), v.length);
-  });
+  for (var t of hourlyFeatures) {
+    console.log('t: ', new Date(t[0]));
+  }
+  // dumpToFile(hourlyFeatures, './testout/');
+}
+
+function createIndividualFile (outDir, key, value) {
+  const dateObj = new Date(key);
+  console.log(dateObj);
+  const fileName = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}-${dateObj.getHours()}.json`;
+  const outputName = path.join(outDir, fileName);
+  fs.writeFile(outputName, JSON.stringify(value), 'utf8', err => { if (err !== undefined) { console.log(`write error: ${err}`); } });
+}
+
+function dumpToFile (inputMap, outDir) {
+  /* Takes a map of date -> segments, we will dump these segments to a (named) file. */
+  inputMap.forEach((v, k) => createIndividualFile(outDir, k, v));
 }
 
 module.exports = {
