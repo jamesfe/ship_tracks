@@ -8,6 +8,7 @@
 var path = require('path');
 var fs = require('fs');
 var turf = require('@turf/turf');
+var readline = require('readline');
 
 function DateNotProvided () {
   this.message = 'Date was not provided.';
@@ -60,14 +61,14 @@ function bucketToHours (inFeature) {
 
 function main (targetFile, outDir) {
   /* Read from an input file and build a map of segments -> hours */
-  const inData = require(targetFile);
-  var totalWrites = 0;
-  for (var i = 0; i < inData.length; i++) {
-    var feature = inData[i];
+
+  var rd = readline.createInterface({ input: fs.createReadStream(targetFile) });
+
+  rd.on('line', function(line) {
+    var feature = JSON.parse(line);
     var tempHourly = bucketToHours(feature);
-    totalWrites += dumpToFile(tempHourly, outDir);
-  }
-  console.log(`Total file handles written to: ${totalWrites}`);
+    dumpToFile(tempHourly, outDir);
+  });
 }
 
 function writeHourBucketToFile (outDir, key, value) {
