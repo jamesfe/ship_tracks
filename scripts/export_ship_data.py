@@ -5,7 +5,7 @@ import json
 
 
 def print_with_delim(delim=''):
-    tgt = './data/EastCoastVesselTracklines2011/EastCoastVesselTracklines2011.gdb/'
+    tgt = './data/EastCoastVesselTracklines2013/EastCoastVesselTracklines2013.gdb/'
     #with fiona.open('./data/EastCoastVesselTracklines2011.gdb/', 'r') as infile:
     with fiona.open(tgt, 'r') as infile:
         for k in infile.items():
