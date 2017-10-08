@@ -28,10 +28,10 @@ function bucketToHours (inFeature) {
 
   const distance = turf.lineDistance(inFeature, 'kilometers');
   console.log("distance", distance);
-  var count = 0;
+  var count = -1;
 
   const totalTimeSeconds = (endTime - startTime) / 1000;
-  console.log(totalTimeSeconds);
+  console.log("total seconds: ", totalTimeSeconds);
   const kmPerSecond = (distance / totalTimeSeconds);
   console.log('km per second', kmPerSecond);
   var sliced = [];
@@ -43,21 +43,23 @@ function bucketToHours (inFeature) {
     /* We create a map of hours where we will put segments. */
     /* The bucket contains segments which occur in the 60 minutes after the key. */
 
-    console.log('before bucket: ', new Date(currentBucket));
-    if (count === 0) {
+    if (count === -1) {
+      console.log('count is zero');
       sliced = turf.lineSliceAlong(inFeature, 0, firstDistanceKm, 'kilometers');
       console.log(0, firstDistanceKm);
       buckets.set(currentBucket, sliced);
     } else {
+      console.log('count bigggger');
       const startSliceKm = firstDistanceKm + (3600 * count * kmPerSecond);
       const endSliceKm = startSliceKm + (3600 * kmPerSecond);
+      console.log('start minus', startSliceKm - firstDistanceKm);
       console.log(startSliceKm, endSliceKm);
       sliced = turf.lineSliceAlong(inFeature, startSliceKm, endSliceKm, 'kilometers');
       buckets.set(currentBucket, sliced);
     }
+    count++;
     currentBucket += (3600 * 1000); // millis in an hour
     console.log('bucket: ', new Date(currentBucket));
-    count++;
   }
   return buckets;
 }
