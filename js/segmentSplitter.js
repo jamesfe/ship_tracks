@@ -21,6 +21,28 @@ function fullDateToDailyDate (inDate) {
   return new Date(inDate.getFullYear(), inDate.getMonth(), inDate.getDate());
 }
 
+
+function carefullySlice (feature, start, end, distance) {
+  var sliced = undefined;
+  if (end > distance) {
+    end = distance;
+  }
+  if ((start < distance) && (end <= distance)) {
+    try {
+      sliced = turf.lineSliceAlong(feature, start, end, 'kilometers');
+    } catch (e) {
+      console.log(`Caught error: ${e}`);
+      console.log(`Start: ${start} End: ${end} Distance: ${distance}`);
+      console.log(feature);
+    }
+  } else {
+    console.log(`Start: ${start} End: ${end} Distance: ${distance}`);
+    console.log('too short');
+  }
+  return sliced
+}
+
+
 function bucketToHours (inFeature) {
   const startTime = new Date(Date.parse(inFeature.properties.trackStartTime));
   const endTime = new Date(Date.parse(inFeature.properties.trackEndTime));
@@ -28,7 +50,13 @@ function bucketToHours (inFeature) {
   var currentBucket = new Date(fullDateToDailyDate(startTime).setHours(startTime.getHours())).getTime();
   var buckets = new Map();
 
-  const turfFeature = turf.lineString(inFeature.geometry.coordinates[0]);
+  const lineCoordinates = inFeature.geometry.coordinates[0];
+  if (lineCoordinates.length < 2) {
+    console.log('Skipping invalid feature (too short)');
+    return (buckets);
+  }
+
+  const turfFeature = turf.lineString(lineCoordinates);
   const distance = turf.lineDistance(turfFeature, 'kilometers');
 
   const totalTimeSeconds = (endTime - startTime) / 1000;
@@ -43,15 +71,19 @@ function bucketToHours (inFeature) {
     /* The bucket contains segments which occur in the 60 minutes after the key. */
 
     if (count === -1) {
-      var sliced = turf.lineSliceAlong(turfFeature, 0, firstDistanceKm, 'kilometers');
-      sliced.properties = JSON.parse(JSON.stringify(inFeature.properties));
-      buckets.set(currentBucket, sliced);
+      sliced = carefullySlice(turfFeature, 0, firstDistanceKm, distance);
+      if (sliced !== undefined) {
+        sliced.properties = JSON.parse(JSON.stringify(inFeature.properties));
+        buckets.set(currentBucket, sliced);
+      }
     } else {
       const startSliceKm = firstDistanceKm + (3600 * count * kmPerSecond);
       const endSliceKm = startSliceKm + (3600 * kmPerSecond);
-      sliced = turf.lineSliceAlong(turfFeature, startSliceKm, endSliceKm, 'kilometers');
-      sliced.properties = JSON.parse(JSON.stringify(inFeature.properties));
-      buckets.set(currentBucket, sliced);
+      sliced = carefullySlice(turfFeature, startSliceKm, endSliceKm, distance);
+      if (sliced !== undefined) {
+        sliced.properties = JSON.parse(JSON.stringify(inFeature.properties));
+        buckets.set(currentBucket, sliced);
+      }
     }
     count++;
     currentBucket += (3600 * 1000); // millis in an hour
@@ -63,11 +95,16 @@ function main (targetFile, outDir) {
   /* Read from an input file and build a map of segments -> hours */
 
   var rd = readline.createInterface({ input: fs.createReadStream(targetFile) });
-
+  var linesRead = 0;
+  var appendsMade = 0;
   rd.on('line', function(line) {
     var feature = JSON.parse(line);
     var tempHourly = bucketToHours(feature);
-    dumpToFile(tempHourly, outDir);
+    appendsMade += dumpToFile(tempHourly, outDir);
+    linesRead++;
+    if (linesRead % 5000 === 0) {
+      console.log(`${new Date()} Lines Read; ${linesRead} and appends: ${appendsMade}`);
+    }
   });
 }
 
