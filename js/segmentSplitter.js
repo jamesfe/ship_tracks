@@ -58,14 +58,14 @@ function bucketToHours (inFeature) {
   return buckets;
 }
 
-function main (targetFile) {
+function main (targetFile, outDir) {
   /* Read from an input file and build a map of segments -> hours */
   const inData = require(targetFile);
   var totalWrites = 0;
   for (var i = 0; i < inData.length; i++) {
     var feature = inData[i];
     var tempHourly = bucketToHours(feature);
-    totalWrites += dumpToFile(tempHourly, './testout/');
+    totalWrites += dumpToFile(tempHourly, outDir);
   }
   console.log(`Total file handles written to: ${totalWrites}`);
 }
