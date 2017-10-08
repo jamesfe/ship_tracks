@@ -23,6 +23,10 @@ function fullDateToDailyDate (inDate) {
 
 
 function carefullySlice (feature, start, end, distance) {
+  /* TODO: Figure out why we have to do this.  Why do we sometimes find times that are not congruent with our
+   * distance calculations?
+   * Why are sometimes the start and end the same?
+   * */
   var sliced = undefined;
   if (end > distance) {
     end = distance;
