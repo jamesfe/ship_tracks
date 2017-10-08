@@ -1,33 +1,38 @@
 {
-  "name": "ship_picture",
-  "version": "1.0.0",
-  "description": "show a picture of ships",
-  "main": "main.js",
-  "scripts": {
-    "start": "node_modules/webpack-dev-server/bin/webpack-dev-server.js",
-    "webpack": "./node_modules/.bin/webpack --config webpack.config.js --watch",
-    "test": "mocha"
-  },
-  "author": "jamesfe",
-  "license": "ISC",
-  "devDependencies": {
-    "babel-core": "^6.25.0",
-    "babel-loader": "^7.1.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-es2015": "^6.24.1",
-    "jshint": "^2.9.5",
-    "jshint-loader": "^0.8.4",
-    "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.5.0",
-    "mocha": "^3.4.2"
-  },
-  "dependencies": {
-    "babel-polyfill": "^6.23.0",
-    "babel-runtime": "^6.23.0",
-    "d3": "^4.10.2",
-    "d3-geo": "^1.6.4",
-    "d3-node": "^1.1.1",
-    "geolib": "^2.0.22",
-    "svg2png": "^4.1.1"
-  }
+    "author": "jamesfe",
+    "dependencies": {
+        "@turf/turf": "4.7.3",
+        "d3": "4.10.2",
+        "d3-geo": "1.6.4",
+        "d3-node": "1.1.1",
+        "lint": "1.1.2",
+        "svg2png": "4.1.1"
+    },
+    "description": "show a picture of ships",
+    "devDependencies": {
+        "eslint": "4.7.2",
+        "eslint-config-standard": "10.2.1",
+        "eslint-plugin-import": "2.7.0",
+        "eslint-plugin-node": "5.1.1",
+        "eslint-plugin-promise": "3.5.0",
+        "eslint-plugin-standard": "3.0.1",
+        "jshint": "2.9.5",
+        "jshint-loader": "0.8.4",
+        "n-readlines": "0.2.8"
+    },
+    "license": "ISC",
+    "main": "main.js",
+    "name": "ship_picture",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jamesfe/ship_tracks"
+    },
+    "scripts": {
+        "lint": "./node_modules/eslint/bin/eslint.js *.js",
+        "lintseg": "./node_modules/eslint/bin/eslint.js segmentSplitter.js",
+        "start": "node_modules/webpack-dev-server/bin/webpack-dev-server.js",
+        "test": "mocha",
+        "webpack": "./node_modules/.bin/webpack --config webpack.config.js --watch"
+    },
+    "version": "1.0.0"
 }

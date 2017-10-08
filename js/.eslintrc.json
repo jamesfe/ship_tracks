@@ -1,0 +1,7 @@
+{
+    "extends": "standard",
+    "rules": {
+        "semi": ["error", "always"],
+        "no-unmodified-loop-condition": 0
+    }
+}

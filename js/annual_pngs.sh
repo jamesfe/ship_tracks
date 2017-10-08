@@ -1,9 +1,9 @@
 #!/bin/bash
-#for i in `seq 1 365`;
-#do
-#	printf $i" "
-#	node ./node_render.js $i
-#done
+for i in `seq 1 365`;
+do
+	printf $i" "
+	node ./node_render.js $i
+done
 
 # Make it
 convert -delay 10 -loop 0 ../output/2013/*.png $(date +%s).gif
