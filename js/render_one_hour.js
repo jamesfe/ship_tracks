@@ -1,14 +1,41 @@
 const D3Node = require('d3-node');
 var d3 = require('d3');
 var fs = require('fs');
+var path = require('path');
 const svg2png = require('svg2png');
 
+const styles = {
+  styles: `
+    .country { fill: #8c8e91; stroke: #2c2d2d; stroke-width: 2px }
+    .fullline { fill: none; stroke-opacity: 0.2; stroke: #000000; stroke-width: .3px; }
+    .pastline { fill: none; stroke-opacity: 0.05; stroke: #000000; stroke-width: .3px; }
+    .sea { fill: #88baea; } .bord { fill: none; stroke: black; stroke-width: 10px; }
+    `
+}
+
+function saveImage (outputLoc, svgString) {
+  const buffer  = svg2png.sync(svgString);
+  fs.open(outputLoc, 'w', function(err, fd) {
+      if (err) {
+          throw 'error opening file: ' + err;
+      }
+
+      fs.write(fd, buffer, 0, buffer.length, null, function(err) {
+          if (err) throw 'error writing file: ' + err;
+          fs.close(fd, function() {
+              console.log('file written', outputLoc);
+          })
+      });
+  });
+}
+/*
 function saveImage (outputLoc, svgString) {
   console.log(`outputting to ${outputLoc}`);
   svg2png(svgString)
     .then(buffer => fs.writeFileSync(outputLoc, buffer))
     .catch(e => console.error(e));
 }
+*/
 
 function drawBox (svg, width, height) {
   /* Draw a box around everything. */
