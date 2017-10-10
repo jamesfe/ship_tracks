@@ -170,22 +170,72 @@ function main () {
   drawBox(svg, width, height);
 
   saveImage(outputLocation, d3n.svgString());
-
-  /* Output a SVG in PNG format. */
-  /*
-  console.log(`outputting to ${outputLocation}`);
-  svg2png(d3n.svgString())
-    .then(buffer => fs.writeFileSync(outputLocation, buffer))
-    .catch(e => console.error(e));
-  */
 }
 
-function renderFrame (dataDir, year, month, day, hour) {
+function generateHourlyInputFileName (directory, dateObj) {
+  const fileName = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}-${dateObj.getHours()}.geo.json`;
+  const fName = path.join(directory, fileName);
+  return fName;
+}
+
+function generateHourlyOutputFileName (directory, dateObj) {
+  // const fileName = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}-${dateObj.getHours()}.png`;
+  const fileName = `${dateObj.getTime()}.png`;
+  const fName = path.join(directory, fileName);
+  return fName;
+}
+
+function renderFrame (dataDir, outputDir, targetHour) {
   const startTime = Date.now();
-  const inFile = generateFileName(dataDir, year, month, day, hour);
-  // TODO: Handle generateDay
-  // Draw all the stuff onto the SVG, copy from main
-  // Save to somewhere.
+
+  var center = [-74.0333747, 40.685949]; var scale = 270000; // manhattan harbor
+  const countriesFile = '../data/countries/just_nyc_area_maritime_osm.geojson';
+  const inFile = generateHourlyInputFileName(dataDir, targetHour);
+  const outputLocation = generateHourlyOutputFileName(outputDir, targetHour);
+  const width = 800;
+  const height = 800;
+
+  // TODO
+  // const dstring = `${month}/${day}/${year}`;
+  const d3n = new D3Node(styles);
+  var svg = d3n.createSVG(width, height);
+
+  drawOcean(svg, width, height);
+
+  /* Draw the country boundaries */
+  var countriesFileData = fs.readFileSync(countriesFile, 'utf-8');
+  var countryFeatures = JSON.parse(countriesFileData).features;
+
+  var projection = d3.geoEquirectangular();
+  var path = d3.geoPath(projection);
+
+  // TODO: Get rid of this somehow
+  projection.fitSize([width, height], boundingBox);
+  projection.center(center).scale(scale);
+  console.log(`Center: ${projection.center()} Scale: ${projection.scale()}`);
+
+  svg.append('path')
+    .datum({type: 'FeatureCollection', features: countryFeatures})
+    .attr('d', path)
+    .attr('class', 'country');
+
+  if (fs.existsSync(inFile)) {
+    var currentShipFileData = fs.readFileSync(inFile, 'utf-8');
+    const shipData = currentShipFileData.split('\n').map(blah => {
+      if (blah.length > 0) {
+        return JSON.parse(blah);
+      }
+    }).filter(n => n !== undefined);
+    svg.append('path')
+      .datum({type: 'FeatureCollection', features: shipData})
+      .attr('d', path)
+      .attr('class', 'fullline');
+  }
+
+  drawBox(svg, width, height);
+  saveImage(outputLocation, d3n.svgString());
+
+  console.log(inFile);
   const endTime = Date.now();
   return (endTime - startTime);
 }
