@@ -1,5 +1,5 @@
 /*
- * Run the thing.
+ * Split a larg file of ship lines into hourly files in a given directory.
  * */
 
 const segSplitter = require('./segmentSplitter');

@@ -37,7 +37,7 @@ projection.fitSize([width, height], boundingBox);
 projection.center(center).scale(scale);
 console.log(`Center: ${projection.center()} Scale: ${projection.scale()}`);
 
-function saveImage (outputLoc, svgString) {
+function svgStringToSavedPng (outputLoc, svgString) {
   console.log(`outputting to ${outputLoc}`);
   svg2png(svgString)
     .then(buffer => fs.writeFileSync(outputLoc, buffer))
@@ -131,15 +131,18 @@ function addSpecificDay (generateDay) {
 }
 
 function finishFrame () {
+  /* Add a box and return the SVG */
   drawBox(svg);
   return (svg);
 }
+
+
 
 createBaseFrame();
 for (var day = 1; day < 11; day++) {
   var outputLocation = addSpecificDay(day);
   finishFrame();
-  saveImage(outputLocation, d3n.svgString());
+  svgStringToSavedPng(outputLocation, d3n.svgString());
 }
 
 const endTime = Date.now();
