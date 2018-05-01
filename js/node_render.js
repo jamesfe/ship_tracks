@@ -64,17 +64,31 @@ function pad(n) {
 
 /* TODO: Curry this */
 function addDays(days) {
-  /* Add a certain number of days to teh first of 2013 */
+  /* Add a certain number of days to the first of 2013 */
   var dat = new Date(2013, 0, 0);
   dat.setDate(dat.getDate() + days);
   return dat;
 }
 
+function julianToCalendarFormat(ival) {
+  /* Take an int from 1-366 and convert it to a day of the year */
+  const dt = addDays(ival);
+  const day = dt.getDate();
+  const month = dt.getMonth() + 1;
+  const year = 2013;
+  return `${year}-${month}-${day}`;
+}
+
 function main() {
   /* Parse arguments */
   const generateDay = parseInt(process.argv[2]);
+  const targetHour = parseInt(process.argv[3]);
+  const dateFormattedForFile = julianToCalendarFormat(generateDay);
   if (generateDay === undefined) {
     throw Error('no day');
+  }
+  if (targetHour === undefined) {
+    throw ERror('no hour');
   }
 
   /* Viewport settings */
@@ -87,23 +101,25 @@ function main() {
   // const center = [-73.8395, 40.564702]; const scale = 40000; // NYC large view
   // const center = [-73.9398, 40.5055]; const scale = 110000;     // Focus on outer NY harbor
   const center = [-74.0333747,40.685949]; const scale = 270000; // manhattan harbor
+  /*
   if (process.argv[3] !== undefined) {
     center = process.argv[3].split(',').map(_ => parseFloat(_))
   }
   if (process.argv[4] !== undefined) {
     scale = parseInt(process.argv[4])
-  }
+  } */
 
   const year = '2013'
   // const countriesFile = '../data/countries/countries.geo.json';
   // const countriesFile = '../data/just_ny_area.geojson';
   const countriesFile = '../data/countries/just_nyc_area_maritime_osm.geojson';
-  const tgt_day_file = `../data/daily_${year}/${generateDay}.json`
+  const fileTail = `${dateFormattedForFile}-${targetHour}.geo.json`
+  const tgt_day_file = `../data/hourly_${year}/${fileTail}`
   // const tgt_day_file = `../data/2011daily/${generateDay}.json`
   const hurricaneFile = '../data/hurricanes.geo.json';
 
   const outputDay = pad(generateDay);
-  const outputLocation = `../output/${year}/${outputDay}.png`
+  const outputLocation = `../output/${year}_hourly/${fileTail}.png`
 
   const showHurricanes = false;
   const showShipTracks = true;
@@ -148,6 +164,7 @@ function main() {
 
   addDateText(svg, width, height, dstring);
 
+  /*
   if (generateDay > 1) {
     const previousDay = `../data/daily_${year}/${generateDay - 1}.json`
     var shipFileData = fs.readFileSync(previousDay, 'utf-8');
@@ -160,14 +177,21 @@ function main() {
         .attr("class", "pastline");
     }
   }
+  */
 
   /* Read the ship lines file synchronously */
   var shipFileData = fs.readFileSync(tgt_day_file, 'utf-8');
-  shipData = JSON.parse(shipFileData);
+  const shipData = shipFileData.split('\n').map(x => {
+    var t = undefined;
+    try { t = JSON.parse(x) }
+    catch(_) { return undefined }
+    return t}).filter(x => x != undefined);
+  console.log("Returning ", shipData.length, " lines");
   var lines = shipData.map(function(a) { return a.geometry; });
   if (showShipTracks === true) {
+    console.log("showing this many lines ", lines.length);
     svg.append("path")
-      .datum({type: "FeatureCollection", features: shipData})
+      .datum({type: "FeatureCollection", features: lines })
       .attr("d", path)
       .attr("class", "fullline");
   }
