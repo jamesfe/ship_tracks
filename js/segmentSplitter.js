@@ -117,7 +117,7 @@ function writeHourBucketToFile (outDir, key, value) {
    * and writes these to a file with one feature per line */
   if (value !== undefined) {
     const dateObj = new Date(key);
-    const fileName = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}-${dateObj.getHours()}.geo.json`;
+    const fileName = `${dateObj.getFullYear()}-${dateObj.getMonth() + 1}-${dateObj.getDate()}-${dateObj.getHours()}.geo.json`;
     const outputName = path.join(outDir, fileName);
     // console.log(`Writing to ${outputName}`);
     fs.appendFileSync(outputName, JSON.stringify(value) + '\n', 'utf8', err => { if (err) { console.log(`write error: ${err}`); } });
