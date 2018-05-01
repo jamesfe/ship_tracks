@@ -4,4 +4,4 @@
 
 const segSplitter = require('./segmentSplitter');
 
-segSplitter.main('../data/ship_lines_2013.json', '../data/hourly_2013/');
+segSplitter.main('../data/1jan_shiplines2013.json', '../data/hourly_2013_1jan/');
