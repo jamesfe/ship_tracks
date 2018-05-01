@@ -48,6 +48,7 @@ function carefullySlice (feature, start, end, distance) {
 
 
 function bucketToHours (inFeature) {
+  /* Return a map of hour -> features in this hour */
   const startTime = new Date(Date.parse(inFeature.properties.trackStartTime));
   const endTime = new Date(Date.parse(inFeature.properties.trackEndTime));
 
@@ -133,5 +134,7 @@ function dumpToFile (inputMap, outDir) {
 }
 
 module.exports = {
-  main: main
+  main: main,
+  fullDateToDailyDate: fullDateToDailyDate,
+  bucketToHours: bucketToHours
 };
