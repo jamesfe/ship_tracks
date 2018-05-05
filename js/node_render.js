@@ -2,6 +2,7 @@ const startTime = Date.now()
 const D3Node = require('d3-node');
 var d3 = require('d3');
 var fs = require('fs');
+var turf = require('@turf/turf');
 const svg2png = require("svg2png");
 
 function saveImage(outputLoc, svgString) {
@@ -52,6 +53,9 @@ var boundingBox = {
             [ -104.765625, 11.867350911459308 ] ] ]
       }
     };
+
+
+var harborBoundingArea = [-74.4, 40.33, -73.75, 40.885];
 
 function pad(n) {
   /* Pad a number up to 3 spaces */
@@ -180,16 +184,18 @@ function main() {
   */
 
   /* Read the ship lines file synchronously */
+  console.log('Reading: ', tgt_day_file);
   var shipFileData = fs.readFileSync(tgt_day_file, 'utf-8');
   const shipData = shipFileData.split('\n').map(x => {
     var t = undefined;
     try { t = JSON.parse(x) }
     catch(_) { return undefined }
     return t}).filter(x => x != undefined);
-  console.log("Returning ", shipData.length, " lines");
-  var lines = shipData.map(function(a) { return a.geometry; });
+  let prevLines = shipData.length;
+  var lines = shipData.map(a => turf.bboxClip(a, harborBoundingArea)).filter(a => a.geometry.coordinates.length > 0);
   if (showShipTracks === true) {
-    console.log("showing this many lines ", lines.length);
+    console.log(`From ${prevLines} showing ${lines.length} a decrease of ${lines.length - prevLines}`);
+    // This is where we draw the lines onto the map
     svg.append("path")
       .datum({type: "FeatureCollection", features: lines })
       .attr("d", path)
@@ -216,16 +222,16 @@ function main() {
   }
 
   drawBox(svg, width, height);
-
-  saveImage(outputLocation, d3n.svgString())
-
-  /* Output a SVG in PNG format. */
-  /*
-  console.log(`outputting to ${outputLocation}`);
-  svg2png(d3n.svgString())
-    .then(buffer => fs.writeFileSync(outputLocation, buffer))
-    .catch(e => console.error(e));
-  */
+  let debugSave = false;
+  if (debugSave === true) {
+    fs.writeFile("./test_output.svg", d3n.svgString(), function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("The test SVG was saved!");
+    });
+  }
+  saveImage(outputLocation, d3n.svgString());
 }
 
 main();
